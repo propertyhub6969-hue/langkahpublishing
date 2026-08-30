@@ -1,34 +1,27 @@
+import { getSite } from '@/lib/store';
+
 export default function Hero() {
+  const { hero } = getSite();
   return (
     <section className="hero" id="beranda">
       <div className="wrap hero-inner">
         <div className="hero-copy">
-          <span className="eyebrow">Penerbit Independen Indonesia</span>
+          <span className="eyebrow">{hero.eyebrow}</span>
           <h1>
-            Setiap cerita memiliki <em>jalan untuk pulang.</em>
+            {hero.titlePlain} <em>{hero.titleEm}</em>
           </h1>
-          <p className="hero-lead">
-            Langkah Pulang Publishing menemani penulis dari halaman pertama sampai
-            buku berada di tangan pembaca. Kami hadir untuk membantu setiap
-            cerita menemukan pembacanya.
-          </p>
+          <p className="hero-lead">{hero.lead}</p>
           <div className="hero-actions">
             <a href="#katalog" className="btn btn-primary">Lihat Katalog Buku</a>
             <a href="#tentang" className="btn btn-ghost">Kenali Kami</a>
           </div>
           <div className="hero-meta">
-            <div>
-              <div className="num">120+</div>
-              <div className="lbl">Judul diterbitkan</div>
-            </div>
-            <div>
-              <div className="num">80+</div>
-              <div className="lbl">Penulis dinaungi</div>
-            </div>
-            <div>
-              <div className="num">2016</div>
-              <div className="lbl">Berkarya sejak</div>
-            </div>
+            {hero.stats.map((s, i) => (
+              <div key={i}>
+                <div className="num">{s.num}</div>
+                <div className="lbl">{s.label}</div>
+              </div>
+            ))}
           </div>
         </div>
 

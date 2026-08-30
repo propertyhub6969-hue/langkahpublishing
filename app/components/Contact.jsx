@@ -1,9 +1,21 @@
-const CONTACTS = [
-  { ic: '✉️', lbl: 'Email', val: 'langkahpublishing@gmail.com', href: 'mailto:langkahpublishing@gmail.com' },
-  { ic: '📍', lbl: 'Alamat', val: 'Banjarbaru, Kalimantan Selatan', href: null },
-];
+import { getSite } from '@/lib/store';
 
 export default function Contact() {
+  const { contact } = getSite();
+
+  const items = [
+    { ic: '✉️', lbl: 'Email', val: contact.email, href: contact.email ? `mailto:${contact.email}` : null },
+    contact.phone && {
+      ic: '📞', lbl: 'WhatsApp', val: contact.phone,
+      href: `https://wa.me/${contact.phone.replace(/[^0-9]/g, '')}`,
+    },
+    { ic: '📍', lbl: 'Alamat', val: contact.address, href: null },
+    contact.instagram && {
+      ic: '📷', lbl: 'Instagram', val: contact.instagram,
+      href: `https://instagram.com/${contact.instagram.replace('@', '')}`,
+    },
+  ].filter(Boolean);
+
   return (
     <section className="section contact" id="kontak">
       <div className="wrap contact-grid">
@@ -19,7 +31,7 @@ export default function Contact() {
           </p>
 
           <div className="contact-list">
-            {CONTACTS.map((c) => (
+            {items.map((c) => (
               <div className="contact-item" key={c.lbl}>
                 <div className="ic">{c.ic}</div>
                 <div>
@@ -35,7 +47,7 @@ export default function Contact() {
 
         <form
           className="form"
-          action="mailto:langkahpublishing@gmail.com"
+          action={`mailto:${contact.email}`}
           method="post"
           encType="text/plain"
         >

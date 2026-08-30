@@ -8,3 +8,7 @@ npm-debug.log*
 .env*
 .vercel
 next-env.d.ts
+
+# Data runtime CMS (katalog buku, teks konten, kredensial admin) — hidup di
+# Docker volume produksi, JANGAN pernah ikut ke git.
+/data

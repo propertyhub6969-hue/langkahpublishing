@@ -30,6 +30,11 @@ COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# Folder data (katalog buku, teks konten, akun admin) disimpan di sini.
+# Dibuat & di-chown di image supaya saat volume Docker pertama kali dipasang
+# di path ini, ownership-nya ikut terwarisi ke volume (writable oleh user nextjs).
+RUN mkdir -p /app/data && chown -R nextjs:nodejs /app/data
+
 USER nextjs
 EXPOSE 3000
 

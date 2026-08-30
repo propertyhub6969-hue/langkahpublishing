@@ -1,7 +1,8 @@
+import { getSite } from '@/lib/store';
 import { Emblem } from './Logo';
 
 export default function Footer() {
-  const year = 2016; // tahun berdiri
+  const { footer, contact } = getSite();
   return (
     <footer className="foot">
       <div className="wrap">
@@ -14,10 +15,7 @@ export default function Footer() {
                 <span>Publishing</span>
               </span>
             </div>
-            <p className="foot-blurb">
-              Penerbit independen Indonesia. Setiap cerita memiliki jalan
-              untuk pulang — fiksi, non-fiksi, dan puisi yang ditulis dengan hati.
-            </p>
+            <p className="foot-blurb">{footer.blurb}</p>
           </div>
 
           <div>
@@ -42,7 +40,10 @@ export default function Footer() {
           <div>
             <h5>Ikuti Kami</h5>
             <ul>
-              <li><a href="mailto:langkahpublishing@gmail.com">Email</a></li>
+              <li><a href={`mailto:${contact.email}`}>Email</a></li>
+              {contact.instagram && (
+                <li><a href={`https://instagram.com/${contact.instagram.replace('@', '')}`} target="_blank" rel="noreferrer">Instagram</a></li>
+              )}
               <li><a href="#kontak">Kirim Pesan</a></li>
             </ul>
           </div>
@@ -50,7 +51,7 @@ export default function Footer() {
 
         <div className="foot-bottom">
           <span>© {new Date().getFullYear()} Langkah Pulang Publishing. Seluruh hak cipta dilindungi.</span>
-          <span>Berkarya sejak {year} · Banjarbaru, Kalimantan Selatan</span>
+          <span>Berkarya sejak {footer.sinceYear} · {contact.address}</span>
         </div>
       </div>
     </footer>

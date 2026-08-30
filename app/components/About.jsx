@@ -1,3 +1,5 @@
+import { getSite } from '@/lib/store';
+
 const VALUES = [
   {
     ic: '🌱',
@@ -20,6 +22,7 @@ const VALUES = [
 ];
 
 export default function About() {
+  const { about } = getSite();
   return (
     <section className="section about" id="tentang">
       <div className="wrap about-grid">
@@ -28,22 +31,9 @@ export default function About() {
           <h2 style={{ fontSize: 'clamp(28px,4vw,42px)', margin: '16px 0 22px' }}>
             Tentang Langkah Pulang Publishing
           </h2>
-          <p className="lead">
-            “Setiap cerita memiliki jalan untuk pulang.”
-          </p>
-          <p>
-            Berdiri sejak 2016, Langkah Pulang Publishing percaya bahwa setiap
-            cerita memiliki perjalanannya sendiri. Kami hadir untuk membantu
-            penulis menghadirkan karya terbaiknya, dan membantu pembaca
-            menemukan cerita yang menjadi bagian dari perjalanan hidupnya.
-          </p>
-          <p>
-            Dari sebuah ruang kerja kecil, kami kini telah menerbitkan lebih dari
-            120 judul lintas genre — fiksi, puisi, memoar, hingga buku anak — dan
-            menaungi puluhan penulis dari berbagai penjuru Indonesia. Kami
-            mengurus setiap tahap dengan cermat: kurasi naskah, penyuntingan,
-            desain, produksi, hingga distribusi.
-          </p>
+          <p className="lead">“{about.lead}”</p>
+          <p>{about.paragraph1}</p>
+          <p>{about.paragraph2}</p>
         </div>
 
         <div className="values">

@@ -8,10 +8,16 @@ services:
     restart: unless-stopped
     networks:
       - edge
+    volumes:
+      - langkahpublishing_data:/app/data
     environment:
       - NODE_ENV=production
       - PORT=3000
       - HOSTNAME=0.0.0.0
+      # Wajib diset (mis. lewat file .env di server, JANGAN commit ke git):
+      - SESSION_SECRET=${SESSION_SECRET}
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_BOOTSTRAP_PASSWORD=${ADMIN_BOOTSTRAP_PASSWORD}
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/"]
       interval: 30s
@@ -22,3 +28,6 @@ services:
 networks:
   edge:
     external: true
+
+volumes:
+  langkahpublishing_data:
