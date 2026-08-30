@@ -12,6 +12,7 @@ export async function PUT(req, { params }) {
   const idx = books.findIndex((b) => b.id === id);
   if (idx === -1) return NextResponse.json({ error: 'Buku tidak ditemukan.' }, { status: 404 });
 
+  const coverType = body.coverType === 'image' && body.coverImage ? 'image' : 'preset';
   books[idx] = {
     ...books[idx],
     title: body.title ?? books[idx].title,
@@ -20,6 +21,8 @@ export async function PUT(req, { params }) {
     tag: body.tag ?? books[idx].tag,
     sub: body.sub ?? books[idx].sub,
     coverPreset: body.coverPreset ?? books[idx].coverPreset,
+    coverType,
+    coverImage: coverType === 'image' ? body.coverImage : '',
     sample: false,
   };
   saveBooks(books);

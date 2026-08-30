@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { COVER_PRESETS, coverCss } from '@/lib/covers';
 
-const EMPTY_FORM = { title: '', author: '', genre: '', tag: '', sub: '', coverPreset: 'copper' };
+const EMPTY_FORM = {
+  title: '', author: '', genre: '', tag: '', sub: '',
+  coverPreset: 'copper', coverType: 'preset', coverImage: '',
+};
 
 export default function BooksAdminPage() {
   const [books, setBooks] = useState(null);
@@ -12,6 +15,8 @@ export default function BooksAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef(null);
 
   async function load() {
     const res = await fetch('/api/admin/books');
@@ -28,6 +33,8 @@ export default function BooksAdminPage() {
     setForm({
       title: book.title, author: book.author, genre: book.genre,
       tag: book.tag, sub: book.sub, coverPreset: book.coverPreset,
+      coverType: book.coverType === 'image' && book.coverImage ? 'image' : 'preset',
+      coverImage: book.coverImage || '',
     });
     setOk(''); setError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -36,6 +43,32 @@ export default function BooksAdminPage() {
   function cancelEdit() {
     setEditingId(null);
     setForm(EMPTY_FORM);
+  }
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch('/api/admin/upload', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Gagal mengunggah gambar.');
+      } else {
+        setForm((f) => ({ ...f, coverType: 'image', coverImage: data.url }));
+      }
+    } catch {
+      setError('Terjadi kesalahan jaringan saat mengunggah.');
+    }
+    setUploading(false);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  }
+
+  function removePhoto() {
+    setForm((f) => ({ ...f, coverType: 'preset', coverImage: '' }));
   }
 
   async function handleSubmit(e) {
@@ -117,21 +150,76 @@ export default function BooksAdminPage() {
               <input value={form.tag} onChange={(e) => setForm({ ...form, tag: e.target.value })} placeholder="Fiksi, Puisi, Non-Fiksi…" />
             </div>
             <div className="a-field">
-              <label>Warna Sampul</label>
-              <select value={form.coverPreset} onChange={(e) => setForm({ ...form, coverPreset: e.target.value })}>
-                {Object.entries(COVER_PRESETS).map(([key, p]) => (
-                  <option key={key} value={key}>{p.label}</option>
-                ))}
-              </select>
+              <label>Subjudul singkat (opsional)</label>
+              <input value={form.sub} onChange={(e) => setForm({ ...form, sub: e.target.value })} placeholder="sebuah novel…" />
             </div>
           </div>
+
           <div className="a-field">
-            <label>Subjudul singkat (opsional)</label>
-            <input value={form.sub} onChange={(e) => setForm({ ...form, sub: e.target.value })} placeholder="mis. sebuah novel, kumpulan sajak" />
+            <label>Sampul Buku</label>
+            <div className="a-cover-tabs">
+              <button
+                type="button"
+                className={`a-cover-tab${form.coverType === 'preset' ? ' active' : ''}`}
+                onClick={() => setForm({ ...form, coverType: 'preset' })}
+              >
+                Warna
+              </button>
+              <button
+                type="button"
+                className={`a-cover-tab${form.coverType === 'image' ? ' active' : ''}`}
+                onClick={() => setForm({ ...form, coverType: 'image' })}
+              >
+                Unggah Gambar
+              </button>
+            </div>
+
+            {form.coverType === 'preset' ? (
+              <div className="a-cover-upload-row">
+                <div className="a-cover-preview" style={{ background: coverCss(form.coverPreset) }} />
+                <div style={{ flex: 1 }}>
+                  <select value={form.coverPreset} onChange={(e) => setForm({ ...form, coverPreset: e.target.value })}>
+                    {Object.entries(COVER_PRESETS).map(([key, p]) => (
+                      <option key={key} value={key}>{p.label}</option>
+                    ))}
+                  </select>
+                  <p className="a-upload-hint">Sampul akan ditampilkan sebagai warna gradasi dengan judul di atasnya.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="a-cover-upload-row">
+                <div className="a-cover-preview">
+                  {form.coverImage ? (
+                    <img src={form.coverImage} alt="Pratinjau sampul" />
+                  ) : (
+                    <span className="ph">Belum ada gambar</span>
+                  )}
+                </div>
+                <div style={{ flex: 1 }}>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileChange}
+                    disabled={uploading}
+                  />
+                  {form.coverImage && (
+                    <button type="button" className="a-btn a-btn-ghost a-btn-sm" style={{ marginTop: 10 }} onClick={removePhoto}>
+                      Hapus Gambar
+                    </button>
+                  )}
+                  <p className="a-upload-hint">
+                    {uploading
+                      ? 'Mengunggah…'
+                      : 'JPG, PNG, atau WebP, maks. 4MB. Gambar otomatis dipotong pas ke ukuran sampul (rasio 3:4.4), tidak perlu diedit dulu.'}
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="a-btn a-btn-primary" disabled={saving}>
+            <button type="submit" className="a-btn a-btn-primary" disabled={saving || uploading}>
               {saving ? 'Menyimpan…' : editingId ? 'Simpan Perubahan' : 'Tambah Buku'}
             </button>
             {editingId && (
@@ -146,22 +234,27 @@ export default function BooksAdminPage() {
       <div className="a-book-list">
         {books === null && <div className="a-empty">Memuat…</div>}
         {books && books.length === 0 && <div className="a-empty">Belum ada buku. Tambahkan buku pertama Anda di atas.</div>}
-        {books && books.map((b) => (
-          <div className="a-book-row" key={b.id}>
-            <div className="a-book-swatch" style={{ background: coverCss(b.coverPreset) }} />
-            <div className="a-book-info">
-              <div className="t">
-                {b.title}
-                {b.sample && <span className="a-sample-badge">Contoh</span>}
+        {books && books.map((b) => {
+          const hasPhoto = b.coverType === 'image' && b.coverImage;
+          return (
+            <div className="a-book-row" key={b.id}>
+              <div className="a-book-swatch" style={hasPhoto ? undefined : { background: coverCss(b.coverPreset) }}>
+                {hasPhoto && <img src={b.coverImage} alt="" />}
               </div>
-              <div className="m">{b.author} · {b.genre}{b.tag ? ` · ${b.tag}` : ''}</div>
+              <div className="a-book-info">
+                <div className="t">
+                  {b.title}
+                  {b.sample && <span className="a-sample-badge">Contoh</span>}
+                </div>
+                <div className="m">{b.author} · {b.genre}{b.tag ? ` · ${b.tag}` : ''}</div>
+              </div>
+              <div className="a-book-actions">
+                <button className="a-btn a-btn-ghost a-btn-sm" onClick={() => startEdit(b)}>Ubah</button>
+                <button className="a-btn a-btn-danger a-btn-sm" onClick={() => handleDelete(b.id)}>Hapus</button>
+              </div>
             </div>
-            <div className="a-book-actions">
-              <button className="a-btn a-btn-ghost a-btn-sm" onClick={() => startEdit(b)}>Ubah</button>
-              <button className="a-btn a-btn-danger a-btn-sm" onClick={() => handleDelete(b.id)}>Hapus</button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

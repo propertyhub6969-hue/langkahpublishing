@@ -31,15 +31,27 @@ export default function Catalog() {
           <p style={{ color: 'var(--muted)' }}>Katalog belum berisi judul apa pun.</p>
         ) : (
           <div className="cat-grid">
-            {books.map((b) => (
+            {books.map((b) => {
+              const hasPhoto = b.coverType === 'image' && b.coverImage;
+              return (
               <article className="bookcard" key={b.id}>
-                <div className="cover" style={{ background: coverCss(b.coverPreset) }}>
+                <div
+                  className={`cover${hasPhoto ? ' has-photo' : ''}`}
+                  style={hasPhoto ? undefined : { background: coverCss(b.coverPreset) }}
+                >
+                  {hasPhoto ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img className="cover-photo" src={b.coverImage} alt={`Sampul buku ${b.title}`} />
+                  ) : (
+                    <>
+                      <small>{b.genre}</small>
+                      <div>
+                        <b>{b.title}</b>
+                        <i>{b.sub}</i>
+                      </div>
+                    </>
+                  )}
                   {b.sample && <span className="cover-sample">Contoh</span>}
-                  <small>{b.genre}</small>
-                  <div>
-                    <b>{b.title}</b>
-                    <i>{b.sub}</i>
-                  </div>
                 </div>
                 <div className="bookmeta">
                   <h4>{b.title}</h4>
@@ -47,7 +59,8 @@ export default function Catalog() {
                   {b.tag && <span className="tag">{b.tag}</span>}
                 </div>
               </article>
-            ))}
+              );
+            })}
           </div>
         )}
 
