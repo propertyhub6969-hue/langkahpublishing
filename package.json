@@ -1,0 +1,17 @@
+{
+  "name": "langkah-pulang-publishing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing page Langkah Pulang Publishing — rumah bagi cerita yang membawa pulang",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "14.2.15",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
