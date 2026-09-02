@@ -17,7 +17,7 @@ export async function POST(req) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await req.json().catch(() => ({}));
-  const { title, author, genre, tag, sub, coverPreset, coverType, coverImage } = body;
+  const { title, author, genre, tag, sub, description, coverPreset, coverType, coverImage, fileUrl, fileName } = body;
   if (!title || !author) {
     return NextResponse.json({ error: 'Judul dan penulis wajib diisi.' }, { status: 400 });
   }
@@ -30,9 +30,12 @@ export async function POST(req) {
     genre: genre || '',
     tag: tag || '',
     sub: sub || '',
+    description: description || '',
     coverPreset: coverPreset || 'copper',
     coverType: coverType === 'image' && coverImage ? 'image' : 'preset',
     coverImage: coverType === 'image' ? (coverImage || '') : '',
+    fileUrl: fileUrl || '',
+    fileName: fileUrl ? (fileName || '') : '',
     sample: false,
   };
   books.push(newBook);

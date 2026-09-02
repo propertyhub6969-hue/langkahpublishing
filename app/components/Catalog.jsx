@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { getBooks, getSite } from '@/lib/store';
 import { coverCss } from '@/lib/covers';
 
@@ -34,7 +35,7 @@ export default function Catalog() {
             {books.map((b) => {
               const hasPhoto = b.coverType === 'image' && b.coverImage;
               return (
-              <article className="bookcard" key={b.id}>
+              <Link href={`/buku/${b.id}`} className="bookcard" key={b.id}>
                 <div
                   className={`cover${hasPhoto ? ' has-photo' : ''}`}
                   style={hasPhoto ? undefined : { background: coverCss(b.coverPreset) }}
@@ -57,8 +58,9 @@ export default function Catalog() {
                   <h4>{b.title}</h4>
                   <div className="author">{b.author}</div>
                   {b.tag && <span className="tag">{b.tag}</span>}
+                  <span className="detail-link">Lihat Detail →</span>
                 </div>
-              </article>
+              </Link>
               );
             })}
           </div>

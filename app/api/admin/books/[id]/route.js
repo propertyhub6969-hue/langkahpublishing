@@ -20,9 +20,12 @@ export async function PUT(req, { params }) {
     genre: body.genre ?? books[idx].genre,
     tag: body.tag ?? books[idx].tag,
     sub: body.sub ?? books[idx].sub,
+    description: body.description ?? books[idx].description ?? '',
     coverPreset: body.coverPreset ?? books[idx].coverPreset,
     coverType,
     coverImage: coverType === 'image' ? body.coverImage : '',
+    fileUrl: body.fileUrl ?? books[idx].fileUrl ?? '',
+    fileName: (body.fileUrl ?? books[idx].fileUrl) ? (body.fileName ?? books[idx].fileName ?? '') : '',
     sample: false,
   };
   saveBooks(books);

@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { COVER_PRESETS, coverCss } from '@/lib/covers';
 
 const EMPTY_FORM = {
-  title: '', author: '', genre: '', tag: '', sub: '',
+  title: '', author: '', genre: '', tag: '', sub: '', description: '',
   coverPreset: 'copper', coverType: 'preset', coverImage: '',
+  fileUrl: '', fileName: '',
 };
 
 export default function BooksAdminPage() {
@@ -15,7 +16,9 @@ export default function BooksAdminPage() {
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const coverInputRef = useRef(null);
   const fileInputRef = useRef(null);
 
   async function load() {
@@ -32,9 +35,11 @@ export default function BooksAdminPage() {
     setEditingId(book.id);
     setForm({
       title: book.title, author: book.author, genre: book.genre,
-      tag: book.tag, sub: book.sub, coverPreset: book.coverPreset,
+      tag: book.tag, sub: book.sub, description: book.description || '',
+      coverPreset: book.coverPreset,
       coverType: book.coverType === 'image' && book.coverImage ? 'image' : 'preset',
       coverImage: book.coverImage || '',
+      fileUrl: book.fileUrl || '', fileName: book.fileName || '',
     });
     setOk(''); setError('');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -45,10 +50,10 @@ export default function BooksAdminPage() {
     setForm(EMPTY_FORM);
   }
 
-  async function handleFileChange(e) {
+  async function handleCoverChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setUploadingCover(true);
     setError('');
     const fd = new FormData();
     fd.append('file', file);
@@ -63,12 +68,38 @@ export default function BooksAdminPage() {
     } catch {
       setError('Terjadi kesalahan jaringan saat mengunggah.');
     }
-    setUploading(false);
+    setUploadingCover(false);
+    if (coverInputRef.current) coverInputRef.current.value = '';
+  }
+
+  function removeCoverImage() {
+    setForm((f) => ({ ...f, coverType: 'preset', coverImage: '' }));
+  }
+
+  async function handleFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingFile(true);
+    setError('');
+    const fd = new FormData();
+    fd.append('file', file);
+    try {
+      const res = await fetch('/api/admin/upload-file', { method: 'POST', body: fd });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Gagal mengunggah file.');
+      } else {
+        setForm((f) => ({ ...f, fileUrl: data.url, fileName: data.name }));
+      }
+    } catch {
+      setError('Terjadi kesalahan jaringan saat mengunggah.');
+    }
+    setUploadingFile(false);
     if (fileInputRef.current) fileInputRef.current.value = '';
   }
 
-  function removePhoto() {
-    setForm((f) => ({ ...f, coverType: 'preset', coverImage: '' }));
+  function removeFile() {
+    setForm((f) => ({ ...f, fileUrl: '', fileName: '' }));
   }
 
   async function handleSubmit(e) {
@@ -114,7 +145,10 @@ export default function BooksAdminPage() {
   return (
     <div>
       <h1>Katalog Buku</h1>
-      <p className="desc">Tambah, ubah, atau hapus judul yang tampil di halaman Katalog Buku.</p>
+      <p className="desc">
+        Tambah, ubah, atau hapus judul. Setiap buku otomatis punya halaman detail sendiri
+        (bisa diklik dari Katalog Buku) — lengkapi deskripsi &amp; unggah PDF supaya pengunjung bisa membaca detail dan mengunduhnya.
+      </p>
 
       {error && <div className="a-msg a-msg-error">{error}</div>}
       {ok && <div className="a-msg a-msg-ok">{ok}</div>}
@@ -153,6 +187,16 @@ export default function BooksAdminPage() {
               <label>Subjudul singkat (opsional)</label>
               <input value={form.sub} onChange={(e) => setForm({ ...form, sub: e.target.value })} placeholder="sebuah novel…" />
             </div>
+          </div>
+
+          <div className="a-field">
+            <label>Deskripsi Lengkap (tampil di halaman detail, opsional)</label>
+            <textarea
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+              placeholder="Sinopsis atau ringkasan buku yang akan dibaca pengunjung di halaman detail…"
+              rows={4}
+            />
           </div>
 
           <div className="a-field">
@@ -197,19 +241,19 @@ export default function BooksAdminPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <input
-                    ref={fileInputRef}
+                    ref={coverInputRef}
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
-                    onChange={handleFileChange}
-                    disabled={uploading}
+                    onChange={handleCoverChange}
+                    disabled={uploadingCover}
                   />
                   {form.coverImage && (
-                    <button type="button" className="a-btn a-btn-ghost a-btn-sm" style={{ marginTop: 10 }} onClick={removePhoto}>
+                    <button type="button" className="a-btn a-btn-ghost a-btn-sm" style={{ marginTop: 10 }} onClick={removeCoverImage}>
                       Hapus Gambar
                     </button>
                   )}
                   <p className="a-upload-hint">
-                    {uploading
+                    {uploadingCover
                       ? 'Mengunggah…'
                       : 'JPG, PNG, atau WebP, maks. 4MB. Gambar otomatis dipotong pas ke ukuran sampul (rasio 3:4.4), tidak perlu diedit dulu.'}
                   </p>
@@ -218,8 +262,34 @@ export default function BooksAdminPage() {
             )}
           </div>
 
+          <div className="a-field">
+            <label>File Buku untuk Dibaca &amp; Diunduh (PDF, opsional)</label>
+            {form.fileUrl ? (
+              <div className="a-file-row">
+                <span className="a-file-chip">📄 {form.fileName || 'buku.pdf'}</span>
+                <a href={form.fileUrl} target="_blank" rel="noreferrer" className="a-btn a-btn-ghost a-btn-sm">Lihat File</a>
+                <button type="button" className="a-btn a-btn-danger a-btn-sm" onClick={removeFile}>Hapus File</button>
+              </div>
+            ) : (
+              <>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="application/pdf"
+                  onChange={handleFileChange}
+                  disabled={uploadingFile}
+                />
+                <p className="a-upload-hint">
+                  {uploadingFile
+                    ? 'Mengunggah…'
+                    : 'PDF, maks. 25MB. Kalau kosong, halaman detail akan menampilkan "belum tersedia untuk diunduh".'}
+                </p>
+              </>
+            )}
+          </div>
+
           <div style={{ display: 'flex', gap: 10 }}>
-            <button type="submit" className="a-btn a-btn-primary" disabled={saving || uploading}>
+            <button type="submit" className="a-btn a-btn-primary" disabled={saving || uploadingCover || uploadingFile}>
               {saving ? 'Menyimpan…' : editingId ? 'Simpan Perubahan' : 'Tambah Buku'}
             </button>
             {editingId && (
@@ -245,10 +315,12 @@ export default function BooksAdminPage() {
                 <div className="t">
                   {b.title}
                   {b.sample && <span className="a-sample-badge">Contoh</span>}
+                  {b.fileUrl && <span className="a-pdf-badge">PDF</span>}
                 </div>
                 <div className="m">{b.author} · {b.genre}{b.tag ? ` · ${b.tag}` : ''}</div>
               </div>
               <div className="a-book-actions">
+                <a href={`/buku/${b.id}`} target="_blank" rel="noreferrer" className="a-btn a-btn-ghost a-btn-sm">Lihat</a>
                 <button className="a-btn a-btn-ghost a-btn-sm" onClick={() => startEdit(b)}>Ubah</button>
                 <button className="a-btn a-btn-danger a-btn-sm" onClick={() => handleDelete(b.id)}>Hapus</button>
               </div>
