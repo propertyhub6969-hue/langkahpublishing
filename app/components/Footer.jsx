@@ -51,6 +51,11 @@ export default function Footer() {
 
         <div className="foot-bottom">
           <span>© {new Date().getFullYear()} Langkah Pulang Publishing. Seluruh hak cipta dilindungi.</span>
+          <span className="foot-legal-links">
+            <a href="/privasi">Kebijakan Privasi</a>
+            <span aria-hidden="true">·</span>
+            <a href="/syarat-ketentuan">Syarat &amp; Ketentuan</a>
+          </span>
           <span>Berkarya sejak {footer.sinceYear} · {contact.address}</span>
         </div>
       </div>

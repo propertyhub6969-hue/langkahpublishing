@@ -263,6 +263,30 @@ header.nav {
 .form .btn { width: 100%; margin-top: 6px; }
 .form-note { font-size: 13px; color: var(--muted); text-align: center; margin-top: 14px; }
 
+/* ============ HALAMAN LEGAL (Privasi / Syarat & Ketentuan) ============ */
+.legal { padding: 56px 0 100px; }
+.legal-header { max-width: 680px; margin-bottom: 12px; }
+.legal-header h1 { font-size: clamp(30px, 4.5vw, 44px); margin-bottom: 12px; }
+.legal-updated { font-size: 13.5px; color: var(--muted-2); margin-bottom: 44px; }
+.legal-body { max-width: 720px; }
+.legal-body h2 {
+  font-size: 21px; margin: 40px 0 14px; padding-top: 8px;
+}
+.legal-body h2:first-child { margin-top: 0; }
+.legal-body p { color: var(--ink-soft); font-size: 16px; line-height: 1.75; margin-bottom: 14px; }
+.legal-body ul { margin: 0 0 14px; padding-left: 22px; }
+.legal-body ul li {
+  list-style: disc; color: var(--ink-soft); font-size: 16px; line-height: 1.7; margin-bottom: 8px;
+}
+.legal-body a { color: var(--terra-dark); font-weight: 600; }
+.legal-body a:hover { text-decoration: underline; }
+.legal-toc {
+  display: flex; flex-wrap: wrap; gap: 10px 22px; margin: 28px 0 40px;
+  padding: 18px 22px; background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius);
+}
+.legal-toc a { font-size: 14px; font-weight: 600; color: var(--ink-soft); }
+.legal-toc a:hover { color: var(--terra-dark); }
+
 /* ============ FOOTER ============ */
 footer.foot { background: var(--ink); color: #cbc2b3; padding: 68px 0 34px; }
 .foot-top { display: grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap: 40px; padding-bottom: 44px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
@@ -273,7 +297,11 @@ footer.foot { background: var(--ink); color: #cbc2b3; padding: 68px 0 34px; }
 .foot ul { display: grid; gap: 10px; }
 .foot ul a { font-size: 14.5px; color: #cbc2b3; transition: color .15s; }
 .foot ul a:hover { color: #fff; }
-.foot-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 26px; font-size: 13.5px; color: #7d8894; }
+.foot-bottom { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px 20px; padding-top: 26px; font-size: 13.5px; color: #7d8894; }
+.foot-legal-links { display: inline-flex; align-items: center; gap: 8px; }
+.foot-legal-links a { color: #a89e8c; transition: color .15s; }
+.foot-legal-links a:hover { color: #fff; }
+.foot-legal-links span[aria-hidden] { opacity: .5; }
 
 /* ============ DETAIL BUKU ============ */
 .book-detail { padding: 56px 0 110px; }
