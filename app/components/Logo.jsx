@@ -36,7 +36,7 @@ export default function Logo({ variant = 'light' }) {
   // light = dipakai di atas latar gelap (teks ivory); dark = di atas latar terang
   const textColor = variant === 'light' ? '#F7F3EA' : '#0F1D2D';
   return (
-    <a href="#beranda" className="brand" aria-label="Langkah Pulang Publishing">
+    <a href="/#beranda" className="brand" aria-label="Langkah Pulang Publishing">
       <Emblem size={42} />
       <span className="brand-text">
         <b style={{ color: textColor }}>Langkah Pulang</b>
